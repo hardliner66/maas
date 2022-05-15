@@ -1,5 +1,6 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
+use lazy_static::lazy_static;
 use rocket::{
     delete, get,
     http::Status,
@@ -9,18 +10,24 @@ use rocket::{
     tokio::{spawn, sync::Mutex, time::sleep},
     State,
 };
-use rocket_okapi::{openapi, openapi_get_routes, rapidoc::*, settings::UrlObject};
+use rocket_okapi::{openapi, openapi_get_routes, rapidoc::*, settings::UrlObject, swagger_ui::*};
 use schemars::JsonSchema;
 use uuid::Uuid;
 
 #[derive(Serialize, JsonSchema)]
 #[serde(crate = "rocket::serde")]
+#[doc(hidden)]
 struct CustomError {
     message: String,
     code: u16,
 }
 
-const MAX_MUTEX_DURATION: u64 = 120;
+lazy_static! {
+    static ref MAX_MUTEX_DURATION: u64 = std::option_env!("MAAS_MAX_MUTEX_DURATION")
+        .unwrap_or("300")
+        .parse()
+        .unwrap_or(300);
+}
 
 type CustomStatus = (Status, Json<CustomError>);
 
@@ -43,6 +50,13 @@ struct LockMutexData {
 
 #[openapi]
 #[get("/lock/<name>")]
+/// Returns if a mutex with the given name is locked
+///
+/// Returns a struct with the `name` and the `is_locked` property of a mutex.
+///
+/// # Arguments
+///
+/// * `name` - The name of the mutex.
 async fn is_locked(state: &State<MutexList>, name: &str) -> Json<MutexData> {
     let ml = state.lock().await;
     Json(MutexData {
@@ -56,19 +70,39 @@ async fn try_add(ml: &MutexList, name: &str, uuid: &Uuid) -> bool {
     if ml.contains_key(name) {
         false
     } else {
-        ml.insert(name.into(), (uuid.clone(), MAX_MUTEX_DURATION));
+        ml.insert(name.into(), (*uuid, *MAX_MUTEX_DURATION));
         true
     }
 }
 
 #[openapi]
 #[put("/lock/<name>?<timeout>")]
+/// Tries to get ownership of a mutex
+///
+/// Tries to get ownership of a mutex with the specified `name`, waiting for a max amount of time specified in `timout`.
+/// This method will not wait longer than the maximum amount of time a mutex can be active. This is
+/// configured by the server owner.
+///
+/// # Arguments
+///
+/// * `name` - The name of the mutex.
+///
+/// * `timeout` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return
+/// instantly.
+///
+/// This function returns an uuid, which is proof that you hold the lock. This uuid is needed to
+/// unlock the mutex.
 async fn lock(
     state: &State<MutexList>,
     name: &str,
     timeout: Option<u64>,
 ) -> Result<Json<LockMutexData>, CustomStatus> {
     let timeout = timeout.unwrap_or(60);
+    let timeout = if timeout >= *MAX_MUTEX_DURATION {
+        *MAX_MUTEX_DURATION
+    } else {
+        timeout
+    };
     let end = Instant::now() + Duration::from_secs(timeout);
     let uuid = Uuid::new_v5(&Uuid::NAMESPACE_OID, name.as_bytes());
     while !try_add(state, name, &uuid).await {
@@ -99,6 +133,19 @@ async fn lock(
 
 #[openapi]
 #[delete("/lock/<name>?<uuid>")]
+/// Releases ownership of a mutex
+///
+/// Releases ownership of a mutex with the given `name`, if it is currently owned and the `uuid`
+/// matches.
+///
+/// # Arguments
+///
+/// * `name` - The name of the mutex.
+///
+/// * `uuid` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return
+/// instantly.
+///
+/// returns a struct with the `name` and the `is_locked` property of a mutex.
 async fn unlock(
     state: &State<MutexList>,
     name: &str,
@@ -159,7 +206,7 @@ async fn main() -> Result<(), rocket::Error> {
             sleep(dur).await;
             let mut ml = ml2.lock().await;
             for (_, val) in ml.values_mut() {
-                *val = *val - 1;
+                *val -= 1;
             }
             ml.retain(|_, (_, v)| *v != 0);
         }
@@ -167,12 +214,19 @@ async fn main() -> Result<(), rocket::Error> {
 
     let _rocket = rocket::build()
         .manage(ml)
-        .mount("/", openapi_get_routes![lock, unlock, is_locked])
+        .mount("/mutex", openapi_get_routes![lock, unlock, is_locked])
+        .mount(
+            "/",
+            make_swagger_ui(&SwaggerUIConfig {
+                url: "mutex/openapi.json".to_owned(),
+                ..Default::default()
+            }),
+        )
         .mount(
             "/rapidoc/",
             make_rapidoc(&RapiDocConfig {
                 general: GeneralConfig {
-                    spec_urls: vec![UrlObject::new("General", "../openapi.json")],
+                    spec_urls: vec![UrlObject::new("General", "/mutex/openapi.json")],
                     ..Default::default()
                 },
                 ui: UiConfig {

@@ -646,6 +646,7 @@ dependencies = [
 name = "maas"
 version = "0.1.0"
 dependencies = [
+ "lazy_static",
  "okapi 0.7.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket",
  "rocket_okapi",

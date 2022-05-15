@@ -7,7 +7,8 @@ edition = "2021"
 
 [dependencies]
 rocket = { version = "0.5.0-rc.2", features = [ "json" ] }
-rocket_okapi = { git = "https://github.com/ThouCheese/okapi", branch = "feat/rocket0.5-rc.2", features = ["rapidoc"] }
+rocket_okapi = { git = "https://github.com/ThouCheese/okapi", branch = "feat/rocket0.5-rc.2", features = ["rapidoc", "swagger"] }
 okapi = "0.7.0-rc.1"
 schemars = "0.8.8"
 uuid = { version = "1.0.0", features = ["v5"] }
+lazy_static = "1.4.0"
