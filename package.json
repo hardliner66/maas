@@ -1,0 +1,25 @@
+{
+  "name": "maas",
+  "version": "1.0.0",
+  "description": "I honestly don't know why I made this, but here it is.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hardliner66/maas.git"
+  },
+  "scripts": {
+    "gendoc": "widdershins --environment env.json openapi/openapi.json -o openapi/maas.md"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hardliner66/maas/issues"
+  },
+  "homepage": "https://github.com/hardliner66/maas#readme",
+  "devDependencies": {
+    "widdershins": "^4.0.1"
+  }
+}
