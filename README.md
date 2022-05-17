@@ -10,5 +10,5 @@ Api docs were generated with this: https://mermade.github.io/widdershins/Convert
 ## Running with docker
 ```sh
 docker build -t maas .
-docker run -d -p 80:8000 --name maas maas
+docker run --rm -p 80:8000 --name maas maas
 ```
