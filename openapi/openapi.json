@@ -38,7 +38,7 @@
         }
       },
       "put": {
-        "description": "Tries to get ownership of a mutex\n\nTries to get ownership of a mutex with the specified `name`, waiting for a max amount of time specified in `timout`. This method will not wait longer than the maximum amount of time a mutex can be active. This is configured by the server owner.\n\n# Arguments\n\n* `name` - The name of the mutex.\n\n* `timeout` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return instantly.\n\nThis function returns an uuid, which is proof that you hold the lock. This uuid is needed to unlock the mutex.",
+        "description": "Tries to get ownership of a mutex\n\nTries to get ownership of a mutex with the specified `name`, waiting for a max amount of time specified in `timout`. This method will not wait longer than the maximum amount of time a mutex can be active. This is configured by the server owner.\n\n# Arguments\n\n* `name` - The name of the mutex.\n\n* `timeout` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return instantly.\n\nThis function returns a mutex id, which is proof that you hold the lock. This mutex id is needed to unlock the mutex.",
         "operationId": "lock",
         "parameters": [
           {
@@ -84,7 +84,7 @@
         }
       },
       "delete": {
-        "description": "Releases ownership of a mutex\n\nReleases ownership of a mutex with the given `name`, if it is currently owned and the `uuid` matches.\n\n# Arguments\n\n* `name` - The name of the mutex.\n\n* `uuid` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return instantly.\n\nreturns a struct with the `name` and the `is_locked` property of a mutex.",
+        "description": "Releases ownership of a mutex\n\nReleases ownership of a mutex with the given `name`, if it is currently owned and the `mutex_id` matches.\n\n# Arguments\n\n* `name` - The name of the mutex.\n\n* `mutex_id` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return instantly.\n\nreturns a struct with the `name` and the `is_locked` property of a mutex.",
         "operationId": "unlock",
         "parameters": [
           {
@@ -96,7 +96,7 @@
             }
           },
           {
-            "name": "uuid",
+            "name": "mutex_id",
             "in": "query",
             "required": true,
             "schema": {
@@ -135,11 +135,11 @@
         "type": "object",
         "required": [
           "is_locked",
-          "name",
-          "uuid"
+          "mutex_id",
+          "name"
         ],
         "properties": {
-          "uuid": {
+          "mutex_id": {
             "type": "string"
           },
           "name": {

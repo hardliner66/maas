@@ -97,7 +97,7 @@ Tries to get ownership of a mutex with the specified `name`, waiting for a max a
 
 * `timeout` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return instantly.
 
-This function returns an uuid, which is proof that you hold the lock. This uuid is needed to unlock the mutex.
+This function returns a mutex id, which is proof that you hold the lock. This mutex id is needed to unlock the mutex.
 
 <h3 id="lock-parameters">Parameters</h3>
 
@@ -112,7 +112,7 @@ This function returns an uuid, which is proof that you hold the lock. This uuid 
 
 ```json
 {
-  "uuid": "string",
+  "mutex_id": "string",
   "name": "string",
   "is_locked": true
 }
@@ -137,7 +137,7 @@ This operation does not require authentication
 
 ```shell
 # You can also use wget
-curl -X DELETE /mutex/lock/{name}?uuid=string \
+curl -X DELETE /mutex/lock/{name}?mutex_id=string \
   -H 'Accept: application/json'
 
 ```
@@ -146,13 +146,13 @@ curl -X DELETE /mutex/lock/{name}?uuid=string \
 
 Releases ownership of a mutex
 
-Releases ownership of a mutex with the given `name`, if it is currently owned and the `uuid` matches.
+Releases ownership of a mutex with the given `name`, if it is currently owned and the `mutex_id` matches.
 
 # Arguments
 
 * `name` - The name of the mutex.
 
-* `uuid` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return instantly.
+* `mutex_id` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return instantly.
 
 returns a struct with the `name` and the `is_locked` property of a mutex.
 
@@ -161,7 +161,7 @@ returns a struct with the `name` and the `is_locked` property of a mutex.
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |name|path|string|true|none|
-|uuid|query|string|true|none|
+|mutex_id|query|string|true|none|
 
 > Example responses
 
@@ -196,7 +196,7 @@ This operation does not require authentication
 
 ```json
 {
-  "uuid": "string",
+  "mutex_id": "string",
   "name": "string",
   "is_locked": true
 }
@@ -207,7 +207,7 @@ This operation does not require authentication
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|uuid|string|true|none|none|
+|mutex_id|string|true|none|none|
 |name|string|true|none|none|
 |is_locked|boolean|true|none|none|
 
