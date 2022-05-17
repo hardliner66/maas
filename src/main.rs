@@ -45,7 +45,7 @@ struct MutexData {
 struct LockMutexData {
     #[serde(flatten)]
     inner: MutexData,
-    uuid: String,
+    mutex_id: String,
 }
 
 #[openapi]
@@ -65,12 +65,12 @@ async fn is_locked(state: &State<MutexList>, name: &str) -> Json<MutexData> {
     })
 }
 
-async fn try_add(ml: &MutexList, name: &str, uuid: &Uuid) -> bool {
+async fn try_add(ml: &MutexList, name: &str, mutex_id: &Uuid) -> bool {
     let mut ml = ml.lock().await;
     if ml.contains_key(name) {
         false
     } else {
-        ml.insert(name.into(), (*uuid, *MAX_MUTEX_DURATION));
+        ml.insert(name.into(), (*mutex_id, *MAX_MUTEX_DURATION));
         true
     }
 }
@@ -90,7 +90,7 @@ async fn try_add(ml: &MutexList, name: &str, uuid: &Uuid) -> bool {
 /// * `timeout` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return
 /// instantly.
 ///
-/// This function returns an uuid, which is proof that you hold the lock. This uuid is needed to
+/// This function returns a mutex id, which is proof that you hold the lock. This mutex id is needed to
 /// unlock the mutex.
 async fn lock(
     state: &State<MutexList>,
@@ -104,8 +104,8 @@ async fn lock(
         timeout
     };
     let end = Instant::now() + Duration::from_secs(timeout);
-    let uuid = Uuid::new_v5(&Uuid::NAMESPACE_OID, name.as_bytes());
-    while !try_add(state, name, &uuid).await {
+    let mutex_id = Uuid::new_v4();
+    while !try_add(state, name, &mutex_id).await {
         if Instant::now() > end {
             let status = Status::RequestTimeout;
             return Err((
@@ -123,7 +123,7 @@ async fn lock(
         sleep(Duration::from_secs(1)).await;
     }
     Ok(Json(LockMutexData {
-        uuid: uuid.to_string(),
+        mutex_id: mutex_id.to_string(),
         inner: MutexData {
             name: name.to_owned(),
             is_locked: true,
@@ -132,31 +132,31 @@ async fn lock(
 }
 
 #[openapi]
-#[delete("/lock/<name>?<uuid>")]
+#[delete("/lock/<name>?<mutex_id>")]
 /// Releases ownership of a mutex
 ///
-/// Releases ownership of a mutex with the given `name`, if it is currently owned and the `uuid`
+/// Releases ownership of a mutex with the given `name`, if it is currently owned and the `mutex_id`
 /// matches.
 ///
 /// # Arguments
 ///
 /// * `name` - The name of the mutex.
 ///
-/// * `uuid` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return
+/// * `mutex_id` - The maximum amount of seconds to wait for the mutex. Default: 60. Use 0 to return
 /// instantly.
 ///
 /// returns a struct with the `name` and the `is_locked` property of a mutex.
 async fn unlock(
     state: &State<MutexList>,
     name: &str,
-    uuid: &str,
+    mutex_id: &str,
 ) -> Result<Json<MutexData>, CustomStatus> {
-    let uuid = Uuid::try_parse(uuid);
-    match uuid {
-        Ok(uuid) => {
+    let mutex_id = Uuid::try_parse(mutex_id);
+    match mutex_id {
+        Ok(mutex_id) => {
             let mut ml = state.lock().await;
             if let Some((wanted, _)) = ml.get(name) {
-                if &uuid == wanted {
+                if &mutex_id == wanted {
                     ml.remove(name);
                     Ok(Json(MutexData {
                         name: name.to_owned(),
@@ -168,7 +168,7 @@ async fn unlock(
                         status,
                         Json(CustomError {
                             code: status.code,
-                            message: format!("Uuid not valid for mutex: {}", name),
+                            message: format!("Mutex id not valid for mutex: {}", name),
                         }),
                     ))
                 }
@@ -189,7 +189,7 @@ async fn unlock(
                 status,
                 Json(CustomError {
                     code: status.code,
-                    message: format!("Could not parse uuid: {}", err),
+                    message: format!("Could not parse mutex id: {}", err),
                 }),
             ))
         }
