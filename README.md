@@ -6,3 +6,9 @@ Here are some docs:
 [Api docs](openapi/maas.md)
 
 Api docs were generated with this: https://mermade.github.io/widdershins/ConvertingFilesBasicCLI.html
+
+## Running with docker
+```sh
+docker build -t maas .
+docker run -d -p 80:8000 --name maas maas
+```
