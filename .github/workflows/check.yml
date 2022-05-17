@@ -1,0 +1,32 @@
+on:
+  push:
+    branches:
+      - master
+
+name: Check
+
+jobs:
+  quickcheck:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.rustversion.outputs.rustversion }}
+    steps:
+    - uses: actions/checkout@v2
+    - run: cargo check
+    - run: cargo pkgid
+    - run: 'echo "$(cargo pkgid | cut -d# -f2)"'
+    - id: rustversion
+      run: 'echo "::set-output name=rustversion::$(cargo pkgid | cut -d# -f2)"'
+  build:
+    needs: quickcheck
+    name: 'build-${{matrix.os}}'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cargo build
+    - name: Run tests
+      run: cargo test
