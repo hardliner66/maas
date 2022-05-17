@@ -9,6 +9,12 @@ Api docs were generated with this: https://mermade.github.io/widdershins/Convert
 
 ## Running with docker
 ```sh
+docker pull hardliner66/maas
+docker run --rm -p 80:8000 --name maas hardliner66/maas
+```
+
+## Running local docker build
+```sh
 docker build -t maas .
 docker run --rm -p 80:8000 --name maas maas
 ```
