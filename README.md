@@ -12,3 +12,6 @@ Api docs were generated with this: https://mermade.github.io/widdershins/Convert
 docker build -t maas .
 docker run --rm -p 80:8000 --name maas maas
 ```
+
+## Heroku Instance
+https://mutex-as-a-service.herokuapp.com/
