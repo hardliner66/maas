@@ -98,9 +98,9 @@ jobs:
           - arch: armv7
             distro: ubuntu20.04
 
-    # Pass some environment variables to the container
-    env: | # YAML, but pipe character is necessary
+    env:
       artifact_name: maas-${{ matrix.distro }}_${{ matrix.arch }}
+
     steps:
       - uses: uraimo/run-on-arch-action@v2
         name: Build artifact
