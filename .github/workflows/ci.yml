@@ -16,10 +16,9 @@ jobs:
 
     - name: Create release
       id: create_release
-      uses: "marvinpinto/action-automatic-releases@latest"
+      uses: "softprops/action-gh-release@v1"
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        title: Release ${{ github.ref }}
+        name: Release ${{ github.ref }}
         draft: false
         prerelease: false
 
@@ -40,7 +39,7 @@ jobs:
       id: upload-release-linux
       uses: alexellis/upload-assets@0.2.3
       env: 
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_paths: '["./target/release/maas-linux"]'
@@ -62,7 +61,7 @@ jobs:
       id: upload-release-linux
       uses: alexellis/upload-assets@0.2.3
       env: 
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_paths: '["./target/release/maas-macos"]'
@@ -84,7 +83,7 @@ jobs:
       id: upload-release-windows
       uses: alexellis/upload-assets@0.2.3
       env: 
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_paths: '["./target/release/maas.exe"]'
@@ -99,6 +98,9 @@ jobs:
           - arch: armv7
             distro: ubuntu20.04
 
+    # Pass some environment variables to the container
+    env: | # YAML, but pipe character is necessary
+      artifact_name: maas-${{ matrix.distro }}_${{ matrix.arch }}
     steps:
       - uses: uraimo/run-on-arch-action@v2
         name: Build artifact
@@ -120,7 +122,7 @@ jobs:
 
           # Pass some environment variables to the container
           env: | # YAML, but pipe character is necessary
-            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+            artifact_name: ${{ artifact_name }}
 
           # The shell to run commands with in the container
           shell: /bin/sh
@@ -141,3 +143,12 @@ jobs:
             cargo build --release
             cp target/release/maas "/artifacts/${artifact_name}"
             echo "Produced artifact at /artifacts/${artifact_name}"
+
+    - name: Upload release
+      id: upload-release-${{ matrix.distro }}-${{ matrix.arch }}
+      uses: alexellis/upload-assets@0.2.3
+      env: 
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_paths: '["./artifacts/${{ artifact_name }}"]'
