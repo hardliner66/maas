@@ -135,7 +135,7 @@ jobs:
           # no secrets are present in the container state or logs.
           install: |
               apt-get update -q -y
-              apt-get install -q -y git
+              apt-get install -q -y git curl
               curl https://sh.rustup.rs -sSf | sh -s -- -y
 
           # Produce a binary artifact and place it in the mounted volume
