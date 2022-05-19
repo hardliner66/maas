@@ -142,7 +142,7 @@ jobs:
             echo "Produced artifact at /artifacts/${artifact_name}"
 
       - name: Upload release
-        id: upload-release-${{ matrix.distro }}-${{ matrix.arch }}
+        id: upload-release-other
         uses: alexellis/upload-assets@0.2.3
         env: 
           GITHUB_TOKEN: ${{ github.token }}
