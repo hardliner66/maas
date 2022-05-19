@@ -21,7 +21,7 @@ jobs:
         name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-
+        token: ${{ secrets.PAT }}
 
   build-linux:
     runs-on: ubuntu-latest
