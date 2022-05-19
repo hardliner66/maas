@@ -18,14 +18,13 @@ jobs:
       id: create_release
       uses: "softprops/action-gh-release@v1"
       with:
-        name: Release ${{ github.ref }}
         draft: false
         prerelease: false
         token: ${{ secrets.PAT }}
 
   build-linux:
     runs-on: ubuntu-latest
-
+    needs: release
     steps:
     - uses: actions/checkout@v2
 
@@ -47,6 +46,7 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
+    needs: release
 
     steps:
     - uses: actions/checkout@v2
@@ -69,6 +69,7 @@ jobs:
 
   build-windows:
     runs-on: windows-2019
+    needs: release
 
     steps:
     - uses: actions/checkout@v2
@@ -90,6 +91,7 @@ jobs:
         
   build-other:
     runs-on: ubuntu-20.04
+    needs: release
     strategy:
       matrix:
         include:
