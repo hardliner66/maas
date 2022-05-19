@@ -87,7 +87,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_paths: '["./target/release/maas.exe"]'
-
+        
   build-other:
     runs-on: ubuntu-20.04
     strategy:
@@ -141,11 +141,11 @@ jobs:
             cp target/release/maas "/artifacts/${artifact_name}"
             echo "Produced artifact at /artifacts/${artifact_name}"
 
-    - name: Upload release
-      id: upload-release-${{ matrix.distro }}-${{ matrix.arch }}
-      uses: alexellis/upload-assets@0.2.3
-      env: 
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_paths: '["./artifacts/*"]'
+      - name: Upload release
+        id: upload-release-${{ matrix.distro }}-${{ matrix.arch }}
+        uses: alexellis/upload-assets@0.2.3
+        env: 
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_paths: '["./artifacts/*"]'
