@@ -1,0 +1,144 @@
+name: Publish release
+
+on:
+  push:
+    tags:
+      - v*
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Create release
+      id: create_release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Run build
+      run: cargo build --release && strip --strip-all ./target/release/maas && mv ./target/release/maas ./target/release/maas-linux
+
+    - name: Upload release
+      id: upload-release-linux
+      uses: alexellis/upload-assets@0.2.3
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_paths: '["./target/release/maas-linux"]'
+
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Run build
+      run: cargo build --release && mv ./target/release/maas ./target/release/maas-macos
+
+    - name: Upload release
+      id: upload-release-linux
+      uses: alexellis/upload-assets@0.2.3
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_paths: '["./target/release/maas-macos"]'
+
+
+  build-windows:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Run build
+      run: cargo build --release
+
+    - name: Upload release
+      id: upload-release-windows
+      uses: alexellis/upload-assets@0.2.3
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_paths: '["./target/release/maas.exe"]'
+
+  build-other:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            distro: ubuntu20.04
+          - arch: armv7
+            distro: ubuntu20.04
+
+    steps:
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+
+          # The shell to run commands with in the container
+          shell: /bin/sh
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+              apt-get update -q -y
+              apt-get install -q -y git curl
+              curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            cargo build --release
+            cp target/release/maas "/artifacts/${artifact_name}"
+            echo "Produced artifact at /artifacts/${artifact_name}"
