@@ -39,7 +39,7 @@ jobs:
       id: upload-release-linux
       uses: alexellis/upload-assets@0.2.3
       env: 
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_paths: '["./target/release/maas-linux"]'
@@ -61,7 +61,7 @@ jobs:
       id: upload-release-linux
       uses: alexellis/upload-assets@0.2.3
       env: 
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_paths: '["./target/release/maas-macos"]'
@@ -83,7 +83,7 @@ jobs:
       id: upload-release-windows
       uses: alexellis/upload-assets@0.2.3
       env: 
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_paths: '["./target/release/maas.exe"]'
@@ -107,7 +107,7 @@ jobs:
           distro: ${{ matrix.distro }}
 
           # Not required, but speeds up builds
-          githubToken: ${{ github.token }}
+          githubToken: ${{ secrets.PAT }}
 
           # Create an artifacts directory
           setup: |
@@ -145,7 +145,7 @@ jobs:
         id: upload-release-other
         uses: alexellis/upload-assets@0.2.3
         env: 
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_paths: '["./artifacts/*"]'
