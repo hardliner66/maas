@@ -139,6 +139,7 @@ jobs:
 
           # Produce a binary artifact and place it in the mounted volume
           run: |
+            source $HOME/.cargo/env
             cargo build --release
             cp target/release/maas "/artifacts/${artifact_name}"
             echo "Produced artifact at /artifacts/${artifact_name}"
