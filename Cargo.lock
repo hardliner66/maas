@@ -647,7 +647,7 @@ name = "maas"
 version = "1.0.21"
 dependencies = [
  "lazy_static",
- "okapi 0.7.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "okapi",
  "rocket",
  "rocket_okapi",
  "schemars",
@@ -731,17 +731,6 @@ name = "okapi"
 version = "0.7.0-rc.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce66b6366e049880a35c378123fddb630b1a1a3c37fa1ca70caaf4a09f6e2893"
-dependencies = [
- "log",
- "schemars",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "okapi"
-version = "0.7.0-rc.1"
-source = "git+https://github.com/ThouCheese/okapi?branch=feat/rocket0.5-rc.2#368044999cade2ce8aa13d830b4c9d42a471e153"
 dependencies = [
  "log",
  "schemars",
@@ -1050,12 +1039,13 @@ dependencies = [
 
 [[package]]
 name = "rocket_okapi"
-version = "0.8.0-rc.1"
-source = "git+https://github.com/ThouCheese/okapi?branch=feat/rocket0.5-rc.2#368044999cade2ce8aa13d830b4c9d42a471e153"
+version = "0.8.0-rc.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "489f4f5b120762f7974e65b919fc462d0660fd8b839026d8985b850fe5acccb0"
 dependencies = [
  "either",
  "log",
- "okapi 0.7.0-rc.1 (git+https://github.com/ThouCheese/okapi?branch=feat/rocket0.5-rc.2)",
+ "okapi",
  "rocket",
  "rocket_okapi_codegen",
  "schemars",
@@ -1065,8 +1055,9 @@ dependencies = [
 
 [[package]]
 name = "rocket_okapi_codegen"
-version = "0.8.0-rc.1"
-source = "git+https://github.com/ThouCheese/okapi?branch=feat/rocket0.5-rc.2#368044999cade2ce8aa13d830b4c9d42a471e153"
+version = "0.8.0-rc.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54f94d1ffe41472e08463d7a2674f1db04dc4df745285e8369b33d3cfd6b0308"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -1089,9 +1080,9 @@ checksum = "f3f6f92acf49d1b98f7a81226834412ada05458b7364277387724a237f062695"
 
 [[package]]
 name = "schemars"
-version = "0.8.8"
+version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6b5a3c80cea1ab61f4260238409510e814e38b4b563c06044edf91e7dc070e3"
+checksum = "1847b767a3d62d95cbf3d8a9f0e421cf57a0d8aa4f411d4b16525afb0284d4ed"
 dependencies = [
  "dyn-clone",
  "indexmap",
@@ -1102,9 +1093,9 @@ dependencies = [
 
 [[package]]
 name = "schemars_derive"
-version = "0.8.8"
+version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41ae4dce13e8614c46ac3c38ef1c0d668b101df6ac39817aebdaa26642ddae9b"
+checksum = "af4d7e1b012cb3d9129567661a63755ea4b8a7386d339dc945ae187e403c6743"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1146,9 +1137,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive_internals"
-version = "0.25.0"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1dbab34ca63057a1f15280bdf3c39f2b1eb1b54c17e98360e511637aef7418c6"
+checksum = "85bf8229e7920a9f636479437026331ce11aa132b4dde37d121944a44d6e5f3c"
 dependencies = [
  "proc-macro2",
  "quote",
